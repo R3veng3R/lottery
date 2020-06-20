@@ -38,25 +38,33 @@ public class TicketService {
     }
 
     public List<Ticket> findByQuery(final String query) {
-        List<String> queryList =
+        final List<String> queryList =
                 Stream.of(query.split(" "))
                         .map(String::trim)
                         .collect(Collectors.toList());
 
-        StringBuilder parameters = new StringBuilder();
-        for (String keyword : queryList ) {
-            parameters
-                    .append("t.numbers LIKE '%")
-                    .append(keyword)
-                    .append("%' OR ");
-        }
+        final String params = getQueryString(queryList);
+
+        return entityManager.createQuery(
+                TicketRepository.SELECT_TICKET_QUERY + params,
+                Ticket.class
+        ).getResultList();
+    }
+
+    private String getQueryString(final List<String> queryList) {
+        final StringBuilder parameters = new StringBuilder();
+        parameters.append(" WHERE ");
+
+        queryList.forEach(keyword ->
+                parameters
+                        .append("t.numbers LIKE '%")
+                        .append(keyword)
+                        .append("%' OR ")
+        );
 
         String paramString = parameters.toString();
         paramString = paramString.substring(0, paramString.length() - 4);
 
-        return entityManager.createQuery(
-                TicketRepository.SELECT_TICKET_QUERY + paramString,
-                Ticket.class
-        ).getResultList();
+        return paramString;
     }
 }

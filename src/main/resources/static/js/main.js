@@ -3,14 +3,14 @@ const HEADERS = {
     'Content-Type': 'application/json'
 };
 
-async function shutDownApp() {
+const shutDownApp = async () => {
     await fetch("/actuator/shutdown", {
         method: 'POST',
         headers: {'Content-Type': 'application/json'}
     });
 }
 
-async function addTicket() {
+const addTicket = async () => {
     const newNumbersElement = document.getElementById("new-numbers-input");
     const value = newNumbersElement.value;
 
@@ -30,7 +30,7 @@ async function addTicket() {
     }
 }
 
-async function findTickets() {
+const findTickets = async () => {
     const findQuery = document.getElementById("find-numbers-input");
     const value = findQuery.value;
 
@@ -41,6 +41,10 @@ async function findTickets() {
         });
 
         const list = await result.json();
-        console.log(list);
+        const newNumbersElement = document.getElementById("search-result-div");
+
+        list.forEach( result => {
+            newNumbersElement.innerHTML += "<p>" + result.numbers + "</p>";
+        });
     }
 }
