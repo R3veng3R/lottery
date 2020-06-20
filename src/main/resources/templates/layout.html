@@ -1,0 +1,25 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Lottery App</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <script th:src="@{/js/main.js}"></script>
+</head>
+<body>
+    <header th:insert="/fragments/header.html"></header>
+
+    <div th:replace="/fragments/ticket-form.html"></div>
+    <div th:replace="/fragments/search-form.html"></div>
+
+    <button type="submit" onclick="shutDownApp()"> shut down app</button>
+
+    <ul th:each="ticket: ${tickets}">
+        <li>
+            <p th:text="${ticket.id}"></p>
+            <p th:text="${ticket.numbers}"></p>
+        </li>
+    </ul>
+
+    <div class="search-result-div"></div>
+</body>
+</html>
