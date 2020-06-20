@@ -3,15 +3,10 @@ package ee.spinvest.lottery.service;
 import ee.spinvest.lottery.model.Ticket;
 import ee.spinvest.lottery.repository.TicketRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
-
 
 import javax.persistence.EntityManager;
-import javax.persistence.Query;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 

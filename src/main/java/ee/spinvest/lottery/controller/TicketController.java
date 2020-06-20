@@ -2,6 +2,8 @@ package ee.spinvest.lottery.controller;
 
 import ee.spinvest.lottery.model.Ticket;
 import ee.spinvest.lottery.service.TicketService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -9,19 +11,23 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/ticket")
 public class TicketController {
-    private TicketService ticketService;
+    private final TicketService ticketService;
 
     public TicketController(final TicketService ticketService) {
         this.ticketService = ticketService;
     }
 
     @PostMapping
-    public Ticket addTicket(@RequestBody final Ticket ticket) {
-        return ticketService.save(ticket);
+    public ResponseEntity<Ticket> addTicket(@RequestBody final Ticket ticket) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ticketService.save(ticket));
     }
 
     @GetMapping("/{query}")
-    public List<Ticket> searchTickets(@PathVariable final String query) {
-        return ticketService.findByQuery(query);
+    public ResponseEntity<List<Ticket>> searchTickets(@PathVariable final String query) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ticketService.findByQuery(query));
     }
 }

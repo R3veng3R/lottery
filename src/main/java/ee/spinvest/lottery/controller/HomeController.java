@@ -15,7 +15,7 @@ import java.util.List;
 
 @Controller
 public class HomeController {
-    private TicketService ticketService;
+    private final TicketService ticketService;
 
     public HomeController(final TicketService ticketService) {
         this.ticketService = ticketService;
