@@ -20,7 +20,7 @@ public class HomeController {
         this.ticketService = ticketService;
     }
 
-    @GetMapping("/")
+    @GetMapping("/old-index")
     public String index(final Model model) {
         final List<Ticket> tickets = ticketService.findAll();
 

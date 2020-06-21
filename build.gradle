@@ -34,3 +34,8 @@ dependencies {
 test {
 	useJUnitPlatform()
 }
+
+task copyWebApp(type: Copy) {
+	from 'src/main/webapp/build'
+	into 'src/main/resources/static/.'
+}

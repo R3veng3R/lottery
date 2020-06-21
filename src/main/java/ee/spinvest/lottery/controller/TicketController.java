@@ -30,4 +30,11 @@ public class TicketController {
                 .status(HttpStatus.OK)
                 .body(ticketService.findByQuery(query));
     }
+
+    @GetMapping
+    public ResponseEntity<List<Ticket>> getList() {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ticketService.findAll());
+    }
 }
