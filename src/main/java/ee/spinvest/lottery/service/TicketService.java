@@ -2,6 +2,8 @@ package ee.spinvest.lottery.service;
 
 import ee.spinvest.lottery.model.Ticket;
 import ee.spinvest.lottery.repository.TicketRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityManager;
@@ -12,8 +14,9 @@ import java.util.stream.Stream;
 
 @Service
 public class TicketService {
-    private TicketRepository ticketRepository;
-    private EntityManager entityManager;
+    private final Logger log = LoggerFactory.getLogger(TicketService.class);
+    private final TicketRepository ticketRepository;
+    private final EntityManager entityManager;
 
     public TicketService(final TicketRepository ticketRepository, final EntityManager entityManager) {
         this.ticketRepository = ticketRepository;
@@ -21,6 +24,8 @@ public class TicketService {
     }
 
     public Ticket save(final Ticket ticket) {
+        log.info("Saving ticket with numbers " + ticket.getNumbers());
+
         if (ticket.getCreated() == null) {
             ticket.setCreated(new Date());
         }
@@ -33,6 +38,8 @@ public class TicketService {
     }
 
     public List<Ticket> findByQuery(final String query) {
+        log.info("Executing search query: " + query);
+
         final List<String> queryList =
                 Stream.of(query.split(" "))
                         .map(String::trim)
