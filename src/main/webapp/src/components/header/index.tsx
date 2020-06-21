@@ -5,7 +5,7 @@ const Container = styled.header`
     display: flex;
     justify-content: flex-start;
     align-items: center;
-    background-color: #5f5f5f;
+    background: #640064 linear-gradient(30deg,#7367f0,rgba(115,103,240,.6));
     color: #f1f1f1;
     min-height: 45px;
     
