@@ -19,3 +19,6 @@ management:
       enabled: true
     health:
       show-details: always
+
+app:
+  version: 0.0.1
