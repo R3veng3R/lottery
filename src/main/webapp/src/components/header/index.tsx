@@ -47,7 +47,7 @@ const StyledButton = styled.div`
 export const Header: React.FC = () => {
 
     const shutDownApp = async () => {
-        const result = await Api.post("/actuator/shutdown");
+        const result = await Api.post("/api/shutdown");
 
         if (result.status === 200) {
             // TODO: redirect to bye;
