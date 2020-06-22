@@ -71,7 +71,6 @@ export const HomePage: React.FC = () => {
         if (result.status === 200) {
             setTicketList(result.data);
         }
-        console.log(result.data);
     }
 
     const addTicket = async () => {
