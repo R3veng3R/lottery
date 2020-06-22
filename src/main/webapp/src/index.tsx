@@ -15,6 +15,10 @@ const GlobalStyles = createGlobalStyle`
       -moz-osx-font-smoothing: grayscale;
       background-color: #f8f8f8;
     }
+    
+    * {
+      box-sizing: border-box;
+    }
 `;
 
 ReactDOM.render(
