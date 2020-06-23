@@ -1,75 +1,38 @@
 import React, {useEffect, useState} from "react";
 import {Header} from "../components/header";
-import styled from "styled-components";
 import {Button} from "../components/button";
 import {GoPlus, GoSearch} from "react-icons/go";
 import Api from "../utils/Api";
 import {Loader} from "../components/loader";
+import {Ticket, TicketPage} from "../types";
+import ReactPaginate from 'react-paginate';
+import {Container, Content, FlexWrapper, Input, Label} from "./styles/home-styles";
 
-const FlexWrapper = styled.div`
-  display: flex;
-  align-items: center;
-`;
-
-const Content = styled.section`
-  position: relative;
-  padding: 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-  
-  .margin-right-5 {
-    margin-right: 5px;
-  }
-`;
-
-const Container = styled.div`
-  padding: 1rem;
-  min-width: 48%;
-  min-height: 80vh;
-  margin-bottom: 2.2rem;
-  border: 1px solid rgba(206,206,206,0.35);
-  border-radius: .5rem;
-  box-shadow: 0 4px 25px 0 rgba(0,0,0,.1);
-  background-color: #fff;
-`;
-
-const Input = styled.input`
-  border: 1px solid #d9d9d9;
-  padding: .6rem;
-  background-color: #fff;
-  border-radius: 5px;
-  outline: none;
-  
-  width: 50%;
-  font-size: 1rem;
-  font-weight: 400;
-  line-height: 1.25;
-`;
-
-const Label = styled.label`
-  color: #c7c7c7;
-  line-height: 1.5rem;
-`;
+const DEFAULT_PAGE_SIZE = 20;
+const DEFAULT_TICKET_PAGE: TicketPage = {
+    content: [], empty: true, totalElements: 0, totalPages: 0, number: 0
+}
 
 export const HomePage: React.FC = () => {
-    const [ticketList, setTicketList] = useState([]);
+    const [ticketPage, setTicketPage] = useState<TicketPage>(DEFAULT_TICKET_PAGE);
     const [numbers, setNumbers] = useState<string>('');
     const [isLoading, setLoading] = useState<boolean>(false);
 
     useEffect(() => {
         setLoading(true);
 
-        getTicketList()
+        getTicketPage(0)
             .then( () => setLoading(false));
 
     }, []);
 
 
-    const getTicketList = async () => {
-        const result = await Api.get("/api/ticket");
+    const getTicketPage = async (page: number) => {
+        const result = await Api.get(`/api/ticket?page=${page}&size=${DEFAULT_PAGE_SIZE}`);
         if (result.status === 200) {
-            setTicketList(result.data);
+            const page: TicketPage = result.data;
+            setTicketPage(page);
+            console.log(result);
         }
     }
 
@@ -80,7 +43,7 @@ export const HomePage: React.FC = () => {
 
         const result = await Api.post("/api/ticket", {numbers});
         if(result.status === 200) {
-            await getTicketList();
+            await getTicketPage(ticketPage.number);
         }
 
         setLoading(false);
@@ -111,11 +74,28 @@ export const HomePage: React.FC = () => {
 
                     <ul>
                         {
-                            ticketList.map( (ticket: any) =>
-                                <li> {ticket.id}. {ticket.numbers} </li>
+                            ticketPage.content.map( (ticket: Ticket, index: number) =>
+                                <li key={index}> {ticket.id}. {ticket.numbers} </li>
                             )
                         }
                     </ul>
+
+                    <ReactPaginate
+                        previousLabel={'previous'}
+                        nextLabel={'next'}
+                        breakLabel={'...'}
+                        breakClassName={'break-me'}
+                        pageCount={ ticketPage.totalPages }
+                        marginPagesDisplayed={2}
+                        pageRangeDisplayed={10}
+                        onPageChange={ ({selected}) => {
+                            setLoading(true);
+                            getTicketPage(selected)
+                                .then( result => setLoading(false));
+                        }}
+                        containerClassName={'pagination'}
+                        activeClassName={'active'}
+                    />
 
                 </Container>
 

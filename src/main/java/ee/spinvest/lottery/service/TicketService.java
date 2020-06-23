@@ -4,9 +4,15 @@ import ee.spinvest.lottery.model.Ticket;
 import ee.spinvest.lottery.repository.TicketRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -33,11 +39,14 @@ public class TicketService {
         return ticketRepository.save(ticket);
     }
 
-    public List<Ticket> findAll() {
-        return ticketRepository.findAll();
+    @Transactional(readOnly = true)
+    public Page<Ticket> findAll(final int page, final int size) {
+        final Pageable pageRequest = PageRequest.of(page, size, Sort.by(Sort.Order.desc("created")));
+        return ticketRepository.findAll(pageRequest);
     }
 
-    public List<Ticket> findByQuery(final String query) {
+    @Transactional(readOnly = true)
+    public List findByQuery(final String query) {
         log.info("Executing search query: " + query);
 
         final List<String> queryList =
@@ -46,11 +55,19 @@ public class TicketService {
                         .collect(Collectors.toList());
 
         final String params = getQueryString(queryList);
-
-        return entityManager.createQuery(
+        final Query sqlQuery = entityManager.createQuery(
                 TicketRepository.SELECT_TICKET_QUERY + params,
                 Ticket.class
-        ).getResultList();
+        );
+
+        /** TODO: pagination
+         * int pageNumber = 1;
+         * int pageSize = 10;
+         * query.setFirstResult((pageNumber-1) * pageSize);
+         * query.setMaxResults(pageSize);
+         */
+
+        return sqlQuery.getResultList();
     }
 
     private String getQueryString(final List<String> queryList) {
