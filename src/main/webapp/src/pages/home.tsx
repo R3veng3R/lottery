@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {ChangeEvent, useEffect, useState} from "react";
 import {Header} from "../components/header";
 import {Button} from "../components/button";
 import {GoPlus, GoSearch} from "react-icons/go";
@@ -7,6 +7,7 @@ import {Loader} from "../components/loader";
 import {Ticket, TicketPage} from "../types";
 import ReactPaginate from 'react-paginate';
 import {Container, Content, FlexWrapper, Input, Label} from "./styles/home-styles";
+import {FileUploader} from "../components/file-upload";
 
 const DEFAULT_PAGE_SIZE = 20;
 const DEFAULT_TICKET_PAGE: TicketPage = {
@@ -57,6 +58,7 @@ export const HomePage: React.FC = () => {
         const result = await Api.post("/api/ticket", {numbers});
         if (result.status === 200) {
             await getTicketPage(ticketPage.number);
+            setNumbers("");
         }
 
         setLoading(false);
@@ -67,6 +69,28 @@ export const HomePage: React.FC = () => {
 
         setLoading(true);
         await getSearchPage(0);
+        setLoading(false);
+    }
+
+    const onFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
+        event.persist();
+
+        if ( event.target.files?.length ) {
+            setLoading(true);
+
+            const file =  event.target.files[0];
+            const form = new FormData();
+            form.append("file", file);
+            const result = await Api.post(
+                "/api/ticket/upload", form,
+                {headers: { 'Content-Type': 'multipart/form-data' }});
+
+            if (result.status === 200) {
+                await getTicketPage(0);
+            }
+        }
+
+        event.target.value = "";
         setLoading(false);
     }
 
@@ -87,6 +111,8 @@ export const HomePage: React.FC = () => {
                             <GoPlus size={'1rem'} color={'#fff'}/>
                             &nbsp; Добавить
                         </Button>
+
+                        <FileUploader onChange={ onFileChange } />
                     </FlexWrapper>
 
                     <ul>
