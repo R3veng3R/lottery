@@ -34,7 +34,7 @@ type ButtonProps = {
 }
 
 export const Button: React.FC<ButtonProps> = ({ onClick, ...props }) => (
-    <StyledButton onClick={ onClick }>
+    <StyledButton onClick={ onClick } {...props}>
         { props.children }
     </StyledButton>
 )

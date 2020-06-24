@@ -13,4 +13,5 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
 
     Optional<Ticket> findById(Long id);
     Page<Ticket> findAll(Pageable pageRequest);
+    boolean existsByNumbers(String numbers);
 }

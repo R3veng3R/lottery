@@ -11,9 +11,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,23 +28,27 @@ import java.util.stream.Stream;
 @Service
 public class TicketService {
     private final Logger log = LoggerFactory.getLogger(TicketService.class);
+
     private final TicketRepository ticketRepository;
     private final EntityManager entityManager;
+    private final FileService fileService;
 
-    public TicketService(final TicketRepository ticketRepository, final EntityManager entityManager) {
+
+    public TicketService(final TicketRepository ticketRepository,
+                         final EntityManager entityManager,
+                         final FileService fileService) {
         this.ticketRepository = ticketRepository;
         this.entityManager = entityManager;
+        this.fileService = fileService;
     }
 
     @Transactional
     public Ticket save(final Ticket ticket) {
-        log.info("Saving ticket with numbers " + ticket.getNumbers());
-
         if (ticket.getCreated() == null) {
             ticket.setCreated(new Date());
         }
 
-        return ticketRepository.save(ticket);
+        return ticketRepository.saveAndFlush(ticket);
     }
 
     @Transactional(readOnly = true)
@@ -59,7 +69,7 @@ public class TicketService {
         final String params = getQueryString(queryList);
         final String order = " ORDER BY t.created DESC";
         final TypedQuery<Ticket> sqlQuery = entityManager.createQuery(
-                 TicketRepository.SELECT_TICKET_QUERY + params + order,
+                TicketRepository.SELECT_TICKET_QUERY + params + order,
                 Ticket.class
         );
 
@@ -73,7 +83,7 @@ public class TicketService {
         );
 
         final long countResult = countQuery.getSingleResult();
-        final int totalPages = (int) ( (countResult / size) + 1 );
+        final int totalPages = (int) ((countResult / size) + 1);
 
         return SearchTicketDTO.builder()
                 .content(result)
@@ -99,5 +109,43 @@ public class TicketService {
         paramString = paramString.substring(0, paramString.length() - 4);
 
         return paramString;
+    }
+
+    @Transactional
+    public boolean uploadFile(final MultipartFile file) {
+        log.info("Received uploaded file: " + file.getOriginalFilename());
+
+        if (!file.isEmpty()) {
+            boolean tmpDirExists = fileService.createUploadTmpDir();
+            if (!tmpDirExists) return false;
+
+            boolean isFileSaved = fileService.saveFileToTmpDir(file);
+            if (!isFileSaved) return false;
+
+
+            final Path filePath = Paths.get(fileService.getUploadTmpFolder() + File.separator + file.getOriginalFilename());
+            try (Stream<String> stream = Files.lines(filePath)) {
+
+                stream.forEach(line -> {
+                    if (!ticketRepository.existsByNumbers(line)) {
+                        this.save(Ticket.builder()
+                                .numbers(line)
+                                .created(new Date())
+                                .build()
+                        );
+                    }
+                });
+
+                Files.deleteIfExists(filePath);
+
+            } catch (IOException e) {
+                log.error("ERROR 002: Unable to read or write file to DB");
+                e.printStackTrace();
+                return false;
+            }
+
+        }
+
+        return true;
     }
 }
