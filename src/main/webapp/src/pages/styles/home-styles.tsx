@@ -42,6 +42,6 @@ export const Input = styled.input`
 `;
 
 export const Label = styled.label`
-  color: #c7c7c7;
+  color: #808080;
   line-height: 1.5rem;
 `;
