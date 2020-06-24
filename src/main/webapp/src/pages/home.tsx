@@ -4,10 +4,11 @@ import {Button} from "../components/button";
 import {GoPlus, GoSearch} from "react-icons/go";
 import Api from "../utils/Api";
 import {Loader} from "../components/loader";
-import {Ticket, TicketPage} from "../types";
-import ReactPaginate from 'react-paginate';
+import {TicketPage} from "../types";
 import {Container, Content, FlexWrapper, Input, Label} from "./styles/home-styles";
 import {FileUploader} from "../components/file-upload";
+import {Table} from "../components/table";
+import {Pagination} from "../components/pagination";
 
 const DEFAULT_PAGE_SIZE = 20;
 const DEFAULT_TICKET_PAGE: TicketPage = {
@@ -45,6 +46,16 @@ export const HomePage: React.FC = () => {
         const result = await Api.get(`/api/ticket/search?query=${searchValue}&page=${page}&size=${DEFAULT_PAGE_SIZE}`);
         if (result.status === 200) {
             const page: TicketPage = result.data;
+            const searchArray = searchValue.split(" ");
+
+            page.content.forEach(ticket => {
+                searchArray.forEach( string => {
+                    ticket.numbers = ticket.numbers.trim()
+                        .split(' ').join('&nbsp;')
+                        .replace( new RegExp(string, 'g'), `<mark>${string}</mark>`);
+                });
+            });
+
             setSearchPage(page);
             console.log("SearchResult", result);
         }
@@ -75,15 +86,15 @@ export const HomePage: React.FC = () => {
     const onFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
         event.persist();
 
-        if ( event.target.files?.length ) {
+        if (event.target.files?.length) {
             setLoading(true);
 
-            const file =  event.target.files[0];
+            const file = event.target.files[0];
             const form = new FormData();
             form.append("file", file);
             const result = await Api.post(
                 "/api/ticket/upload", form,
-                {headers: { 'Content-Type': 'multipart/form-data' }});
+                {headers: {'Content-Type': 'multipart/form-data'}});
 
             if (result.status === 200) {
                 await getTicketPage(0);
@@ -112,34 +123,17 @@ export const HomePage: React.FC = () => {
                             &nbsp; Добавить
                         </Button>
 
-                        <FileUploader onChange={ onFileChange } />
+                        <FileUploader onChange={onFileChange}/>
                     </FlexWrapper>
 
-                    <ul>
-                        {
-                            ticketPage.content.map((ticket: Ticket, index: number) =>
-                                <li key={index}> {ticket.id}. {ticket.numbers} </li>
-                            )
-                        }
-                    </ul>
-
-                    <ReactPaginate
-                        previousLabel={'previous'}
-                        nextLabel={'next'}
-                        breakLabel={'...'}
-                        breakClassName={'break-me'}
-                        pageCount={ ticketPage.totalPages }
-                        marginPagesDisplayed={2}
-                        pageRangeDisplayed={10}
-                        onPageChange={({selected}) => {
+                    <Pagination onPageChange={
+                        ({selected}) => {
                             setLoading(true);
                             getTicketPage(selected)
-                                .then(result => setLoading(false));
+                                .then(() => setLoading(false));
                         }}
-                        containerClassName={'pagination'}
-                        activeClassName={'active'}
-                    />
-
+                                page={ticketPage}/>
+                    <Table data={ticketPage.content}/>
                 </Container>
 
                 <Container>
@@ -148,7 +142,7 @@ export const HomePage: React.FC = () => {
                     <FlexWrapper>
                         <Input type="text" className="ticket-search margin-right-5"
                                value={searchValue}
-                               onChange={({target}) => setSearchValue(target.value)} />
+                               onChange={({target}) => setSearchValue(target.value)}/>
 
                         <Button onClick={searchTicket}>
                             <GoSearch size={'1rem'} color={'#fff'}/>
@@ -156,34 +150,16 @@ export const HomePage: React.FC = () => {
                         </Button>
                     </FlexWrapper>
 
-
-                    <ul>
-                        {
-                            searchPage.content.map((ticket: Ticket, index: number) =>
-                                <li key={index}> {ticket.id}. {ticket.numbers} </li>
-                            )
-                        }
-                    </ul>
-
-                    <ReactPaginate
-                        previousLabel={'previous'}
-                        nextLabel={'next'}
-                        breakLabel={'...'}
-                        breakClassName={'break-me'}
-                        pageCount={searchPage.totalPages}
-                        marginPagesDisplayed={2}
-                        pageRangeDisplayed={10}
-                        onPageChange={({selected}) => {
+                    <Pagination onPageChange={
+                        ({selected}) => {
                             setLoading(true);
                             getSearchPage(selected)
-                                .then(result => setLoading(false));
+                                .then(() => setLoading(false));
                         }}
-                        containerClassName={'pagination'}
-                        activeClassName={'active'}
-                    />
+                                page={searchPage}/>
+                    <Table data={searchPage.content}/>
 
                 </Container>
-
                 <Loader isHidden={!isLoading}/>
             </Content>
         </>

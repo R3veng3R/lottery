@@ -148,4 +148,10 @@ public class TicketService {
 
         return true;
     }
+
+    @Transactional
+    public boolean truncateData() {
+        ticketRepository.deleteAll();
+        return true;
+    }
 }

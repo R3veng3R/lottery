@@ -58,4 +58,11 @@ public class TicketController {
                 .status(HttpStatus.OK)
                 .build();
     }
+
+    @DeleteMapping("/truncate")
+    public ResponseEntity<Boolean> truncateData() {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ticketService.truncateData());
+    }
 }

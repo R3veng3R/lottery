@@ -20,7 +20,7 @@ export const Content = styled.section`
 export const Container = styled.div`
   padding: 1rem;
   min-width: 48%;
-  min-height: 80vh;
+  min-height: 90vh;
   margin-bottom: 2.2rem;
   border: 1px solid rgba(206,206,206,0.35);
   border-radius: .5rem;
@@ -44,4 +44,8 @@ export const Input = styled.input`
 export const Label = styled.label`
   color: #808080;
   line-height: 1.5rem;
+  
+  &.margin-bot-5 {
+    margin-bottom: 5px;
+  }
 `;
