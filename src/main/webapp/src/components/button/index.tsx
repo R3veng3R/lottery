@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "styled-components";
+import classNames from "classnames";
 
 const StyledButton = styled.button`
     text-align: center;
@@ -27,14 +28,24 @@ const StyledButton = styled.button`
     :hover {
        background-color: #887ef2;
     }
+    
+    &.danger {
+      background-color: #ea5455;
+      :hover {background-color: #ec6a6b}
+    }
 `;
 
 type ButtonProps = {
     onClick: () => void;
+    className?: string;
+
 }
 
-export const Button: React.FC<ButtonProps> = ({ onClick, ...props }) => (
-    <StyledButton onClick={ onClick } {...props}>
-        { props.children }
+export const Button: React.FC<ButtonProps> = ({onClick, ...props}) => (
+    <StyledButton  {...props}
+                   onClick={onClick}
+                   className={classNames('button ' + props.className)}>
+
+        {props.children}
     </StyledButton>
 )
