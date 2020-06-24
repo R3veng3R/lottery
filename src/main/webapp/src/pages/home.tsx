@@ -15,14 +15,18 @@ const DEFAULT_TICKET_PAGE: TicketPage = {
 
 export const HomePage: React.FC = () => {
     const [ticketPage, setTicketPage] = useState<TicketPage>(DEFAULT_TICKET_PAGE);
+    const [searchPage, setSearchPage] = useState<TicketPage>(DEFAULT_TICKET_PAGE);
+
     const [numbers, setNumbers] = useState<string>('');
+    const [searchValue, setSearchValue] = useState<string>('');
+
     const [isLoading, setLoading] = useState<boolean>(false);
 
     useEffect(() => {
         setLoading(true);
 
         getTicketPage(0)
-            .then( () => setLoading(false));
+            .then(() => setLoading(false));
 
     }, []);
 
@@ -32,7 +36,16 @@ export const HomePage: React.FC = () => {
         if (result.status === 200) {
             const page: TicketPage = result.data;
             setTicketPage(page);
-            console.log(result);
+            console.log("TicketsResult:", result);
+        }
+    }
+
+    const getSearchPage = async (page: number) => {
+        const result = await Api.get(`/api/ticket/search?query=${searchValue}&page=${page}&size=${DEFAULT_PAGE_SIZE}`);
+        if (result.status === 200) {
+            const page: TicketPage = result.data;
+            setSearchPage(page);
+            console.log("SearchResult", result);
         }
     }
 
@@ -42,15 +55,19 @@ export const HomePage: React.FC = () => {
         setLoading(true);
 
         const result = await Api.post("/api/ticket", {numbers});
-        if(result.status === 200) {
+        if (result.status === 200) {
             await getTicketPage(ticketPage.number);
         }
 
         setLoading(false);
     }
 
-    const searchTickets = async () => {
+    const searchTicket = async () => {
+        if (!searchValue.length) return;
 
+        setLoading(true);
+        await getSearchPage(0);
+        setLoading(false);
     }
 
     return (
@@ -74,7 +91,7 @@ export const HomePage: React.FC = () => {
 
                     <ul>
                         {
-                            ticketPage.content.map( (ticket: Ticket, index: number) =>
+                            ticketPage.content.map((ticket: Ticket, index: number) =>
                                 <li key={index}> {ticket.id}. {ticket.numbers} </li>
                             )
                         }
@@ -88,10 +105,10 @@ export const HomePage: React.FC = () => {
                         pageCount={ ticketPage.totalPages }
                         marginPagesDisplayed={2}
                         pageRangeDisplayed={10}
-                        onPageChange={ ({selected}) => {
+                        onPageChange={({selected}) => {
                             setLoading(true);
                             getTicketPage(selected)
-                                .then( result => setLoading(false));
+                                .then(result => setLoading(false));
                         }}
                         containerClassName={'pagination'}
                         activeClassName={'active'}
@@ -103,15 +120,45 @@ export const HomePage: React.FC = () => {
                     <Label>Поиск выйгрышных номеров:</Label>
                     <br/>
                     <FlexWrapper>
-                        <Input type="text" className="ticket-search margin-right-5"/>
-                        <Button onClick={searchTickets}>
+                        <Input type="text" className="ticket-search margin-right-5"
+                               value={searchValue}
+                               onChange={({target}) => setSearchValue(target.value)} />
+
+                        <Button onClick={searchTicket}>
                             <GoSearch size={'1rem'} color={'#fff'}/>
                             &nbsp; Поиск
                         </Button>
                     </FlexWrapper>
+
+
+                    <ul>
+                        {
+                            searchPage.content.map((ticket: Ticket, index: number) =>
+                                <li key={index}> {ticket.id}. {ticket.numbers} </li>
+                            )
+                        }
+                    </ul>
+
+                    <ReactPaginate
+                        previousLabel={'previous'}
+                        nextLabel={'next'}
+                        breakLabel={'...'}
+                        breakClassName={'break-me'}
+                        pageCount={searchPage.totalPages}
+                        marginPagesDisplayed={2}
+                        pageRangeDisplayed={10}
+                        onPageChange={({selected}) => {
+                            setLoading(true);
+                            getSearchPage(selected)
+                                .then(result => setLoading(false));
+                        }}
+                        containerClassName={'pagination'}
+                        activeClassName={'active'}
+                    />
+
                 </Container>
 
-                <Loader isHidden={ !isLoading } />
+                <Loader isHidden={!isLoading}/>
             </Content>
         </>
     )

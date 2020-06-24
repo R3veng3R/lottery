@@ -1,6 +1,7 @@
 package ee.spinvest.lottery.service;
 
 import ee.spinvest.lottery.model.Ticket;
+import ee.spinvest.lottery.model.dto.SearchTicketDTO;
 import ee.spinvest.lottery.repository.TicketRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,7 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
-import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,6 +30,7 @@ public class TicketService {
         this.entityManager = entityManager;
     }
 
+    @Transactional
     public Ticket save(final Ticket ticket) {
         log.info("Saving ticket with numbers " + ticket.getNumbers());
 
@@ -46,8 +48,8 @@ public class TicketService {
     }
 
     @Transactional(readOnly = true)
-    public List findByQuery(final String query) {
-        log.info("Executing search query: " + query);
+    public SearchTicketDTO findByQuery(final String query, final int page, final int size) {
+        log.info("Executing search query: " + query + " page: " + page + " size: " + size);
 
         final List<String> queryList =
                 Stream.of(query.split(" "))
@@ -55,19 +57,31 @@ public class TicketService {
                         .collect(Collectors.toList());
 
         final String params = getQueryString(queryList);
-        final Query sqlQuery = entityManager.createQuery(
-                TicketRepository.SELECT_TICKET_QUERY + params,
+        final String order = " ORDER BY t.created DESC";
+        final TypedQuery<Ticket> sqlQuery = entityManager.createQuery(
+                 TicketRepository.SELECT_TICKET_QUERY + params + order,
                 Ticket.class
         );
 
-        /** TODO: pagination
-         * int pageNumber = 1;
-         * int pageSize = 10;
-         * query.setFirstResult((pageNumber-1) * pageSize);
-         * query.setMaxResults(pageSize);
-         */
+        sqlQuery.setFirstResult(page * size);
+        sqlQuery.setMaxResults(size);
+        final List<Ticket> result = sqlQuery.getResultList();
 
-        return sqlQuery.getResultList();
+        final TypedQuery<Long> countQuery = entityManager.createQuery(
+                TicketRepository.COUNT_TICKET_QUERY + params,
+                Long.class
+        );
+
+        final long countResult = countQuery.getSingleResult();
+        final int totalPages = (int) ( (countResult / size) + 1 );
+
+        return SearchTicketDTO.builder()
+                .content(result)
+                .empty(result.size() == 0)
+                .number(page + 1)
+                .totalElements(countResult)
+                .totalPages(totalPages)
+                .build();
     }
 
     private String getQueryString(final List<String> queryList) {
