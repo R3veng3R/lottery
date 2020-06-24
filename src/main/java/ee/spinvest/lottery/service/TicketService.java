@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
-import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -58,7 +58,7 @@ public class TicketService {
 
         final String params = getQueryString(queryList);
         final String order = " ORDER BY t.created DESC";
-        final Query sqlQuery = entityManager.createQuery(
+        final TypedQuery<Ticket> sqlQuery = entityManager.createQuery(
                  TicketRepository.SELECT_TICKET_QUERY + params + order,
                 Ticket.class
         );
@@ -67,11 +67,12 @@ public class TicketService {
         sqlQuery.setMaxResults(size);
         final List<Ticket> result = sqlQuery.getResultList();
 
-        final Query countQuery = entityManager.createQuery(
-                TicketRepository.COUNT_TICKET_QUERY + params
+        final TypedQuery<Long> countQuery = entityManager.createQuery(
+                TicketRepository.COUNT_TICKET_QUERY + params,
+                Long.class
         );
 
-        final long countResult = (long) countQuery.getSingleResult();
+        final long countResult = countQuery.getSingleResult();
         final int totalPages = (int) ( (countResult / size) + 1 );
 
         return SearchTicketDTO.builder()
