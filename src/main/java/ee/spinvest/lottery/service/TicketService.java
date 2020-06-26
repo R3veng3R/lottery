@@ -1,25 +1,26 @@
 package ee.spinvest.lottery.service;
 
 import ee.spinvest.lottery.model.Ticket;
-import ee.spinvest.lottery.model.dto.SearchTicketDTO;
 import ee.spinvest.lottery.repository.TicketRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -58,57 +59,39 @@ public class TicketService {
     }
 
     @Transactional(readOnly = true)
-    public SearchTicketDTO findByQuery(final String query, final int page, final int size) {
-        log.info("Executing search query: " + query + " page: " + page + " size: " + size);
+    public Page<Ticket> findByQuery2(final String searchQuery, int page, final int size) {
+        log.info("Executing search query: " + searchQuery + " page: " + page + " size: " + size);
 
         final List<String> queryList =
-                Stream.of(query.split(" "))
+                Stream.of(searchQuery.split(" "))
                         .map(String::trim)
                         .collect(Collectors.toList());
 
-        final String params = getQueryString(queryList);
-        final String order = " ORDER BY t.created DESC";
-        final TypedQuery<Ticket> sqlQuery = entityManager.createQuery(
-                TicketRepository.SELECT_TICKET_QUERY + params + order,
-                Ticket.class
-        );
+        final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        final CriteriaQuery<Ticket> criteriaQuery = cb.createQuery(Ticket.class);
+        final Root<Ticket> root = criteriaQuery.from(Ticket.class);
 
-        sqlQuery.setFirstResult(page * size);
-        sqlQuery.setMaxResults(size);
-        final List<Ticket> result = sqlQuery.getResultList();
-
-        final TypedQuery<Long> countQuery = entityManager.createQuery(
-                TicketRepository.COUNT_TICKET_QUERY + params,
-                Long.class
-        );
-
-        final long countResult = countQuery.getSingleResult();
-        final int totalPages = (int) ((countResult / size) + 1);
-
-        return SearchTicketDTO.builder()
-                .content(result)
-                .empty(result.size() == 0)
-                .number(page + 1)
-                .totalElements(countResult)
-                .totalPages(totalPages)
-                .build();
-    }
-
-    private String getQueryString(final List<String> queryList) {
-        final StringBuilder parameters = new StringBuilder();
-        parameters.append(" WHERE ");
-
+        final List<Predicate> predicates = new ArrayList<>();
         queryList.forEach(keyword ->
-                parameters
-                        .append("t.numbers LIKE '%")
-                        .append(keyword)
-                        .append("%' OR ")
+                predicates.add(cb.like(root.get("numbers"), "%" + keyword + "%"))
         );
 
-        String paramString = parameters.toString();
-        paramString = paramString.substring(0, paramString.length() - 4);
+        criteriaQuery
+                .select(root)
+                .where(cb.or(predicates.toArray(new Predicate[]{})))
+                .orderBy(cb.desc(root.get("created")));
 
-        return paramString;
+        final TypedQuery<Ticket> query =
+                entityManager
+                        .createQuery(criteriaQuery)
+                        .setFirstResult(page * size)
+                        .setMaxResults(size);
+
+        final Long count = countSearchResults(cb, predicates.toArray(new Predicate[]{}));
+
+        return new PageImpl<>(
+                query.getResultList(), PageRequest.of(page, size), count
+        );
     }
 
     @Transactional
@@ -153,5 +136,15 @@ public class TicketService {
     public boolean truncateData() {
         ticketRepository.deleteAll();
         return true;
+    }
+
+    @Transactional(readOnly = true)
+    protected Long countSearchResults(final CriteriaBuilder cb, final Predicate[] predicates) {
+        final CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
+        countQuery
+                .select(cb.count(countQuery.from(Ticket.class)))
+                .where(cb.or(predicates));
+
+        return entityManager.createQuery(countQuery).getSingleResult();
     }
 }
