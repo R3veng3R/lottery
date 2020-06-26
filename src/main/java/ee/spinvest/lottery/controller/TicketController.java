@@ -1,7 +1,6 @@
 package ee.spinvest.lottery.controller;
 
 import ee.spinvest.lottery.model.Ticket;
-import ee.spinvest.lottery.model.dto.SearchTicketDTO;
 import ee.spinvest.lottery.service.TicketService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -26,12 +25,12 @@ public class TicketController {
     }
 
     @GetMapping(value = "/search", params = { "query", "page", "size"})
-    public ResponseEntity<SearchTicketDTO> searchTickets(@RequestParam final String query,
+    public ResponseEntity<Page<Ticket>> searchTickets(@RequestParam final String query,
                                                          @RequestParam final int page,
                                                          @RequestParam final int size) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(ticketService.findByQuery(query, page, size));
+                .body(ticketService.findByQuery2(query, page, size));
     }
 
     @GetMapping(params = {"page", "size"})
