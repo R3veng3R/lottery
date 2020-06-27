@@ -49,7 +49,7 @@ export const Header: React.FC = () => {
             </Column>
 
             <Column className="justify-flex-end">
-                <Version>{ 'App version: 1.0.' + appVersion }</Version>
+                <Version>{ 'App version: ' + appVersion }</Version>
                 <StyledButton onClick={ shutDownApp }> <RiShutDownLine size={'2rem'}/> </StyledButton>
             </Column>
 
