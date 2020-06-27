@@ -1,0 +1,1 @@
+bundled_jre\bin\java.exe -jar lottery_1_0.jar
