@@ -45,3 +45,10 @@ export const StyledButton = styled.div`
    
     }
 `;
+
+export const Version = styled.p`
+    color: #cecece;
+    opacity: 0.6;
+    margin: 0 10px 0 0;
+    font-size: 0.7rem;
+`;

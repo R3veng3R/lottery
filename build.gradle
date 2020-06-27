@@ -44,4 +44,14 @@ task copyBatFile(type: Copy) {
 	into './build/libs'
 }
 
-bootJar.finalizedBy(copyBatFile)
+task createVersion()  {
+	doLast {
+		def cmd = "git rev-parse --short HEAD"
+		def proc = cmd.execute()
+		def version = proc.text.trim()
+		new File("src/main/resources/static", "version.json").text = "{\"version\": \"1.0.${ version }\"}"
+	}
+}
+
+copyWebApp.finalizedBy createVersion
+bootJar.finalizedBy copyBatFile
