@@ -5,12 +5,12 @@ import {GoPlus, GoSearch} from "react-icons/go";
 import Api from "../utils/Api";
 import {Loader} from "../components/loader";
 import {TicketPage} from "../types";
-import {Container, Content, FlexWrapper, Input, Label} from "./styles/home-styles";
+import {BodyContainer, Content, FlexWrapper, Input, Label} from "./styles/home-styles";
 import {FileUploader} from "../components/file-upload";
 import {Table} from "../components/table";
 import {Pagination} from "../components/pagination";
+import {DEFAULT_PAGE_SIZE} from "../constants/AppConstants";
 
-const DEFAULT_PAGE_SIZE = 20;
 const DEFAULT_TICKET_PAGE: TicketPage = {
     content: [], empty: true, totalElements: 0, totalPages: 0, number: 0
 }
@@ -52,7 +52,7 @@ export const HomePage: React.FC = () => {
                 searchArray.forEach( string => {
                     ticket.numbers = ticket.numbers.trim()
                         .split(' ').join('&nbsp;')
-                        .replace( new RegExp(string, 'g'), `<mark>${string}</mark>`);
+                        .replace( new RegExp('(?!\/mark)' + string, 'g'), `<mark>${string}</mark>`);
                 });
             });
 
@@ -109,8 +109,8 @@ export const HomePage: React.FC = () => {
         <>
             <Header/>
 
-            <Content>
-                <Container>
+            <BodyContainer>
+                <Content>
                     <Label>Введите номера из билета:</Label>
                     <br/>
                     <FlexWrapper>
@@ -133,10 +133,10 @@ export const HomePage: React.FC = () => {
                                 .then(() => setLoading(false));
                         }}
                                 page={ticketPage}/>
-                    <Table data={ticketPage.content}/>
-                </Container>
+                    <Table data={ticketPage.content} page={ticketPage.number}/>
+                </Content>
 
-                <Container>
+                <Content>
                     <Label>Поиск выйгрышных номеров:</Label>
                     <br/>
                     <FlexWrapper>
@@ -157,11 +157,11 @@ export const HomePage: React.FC = () => {
                                 .then(() => setLoading(false));
                         }}
                                 page={searchPage}/>
-                    <Table data={searchPage.content}/>
+                    <Table data={searchPage.content} page={searchPage.number}/>
 
-                </Container>
+                </Content>
                 <Loader isHidden={!isLoading}/>
-            </Content>
+            </BodyContainer>
         </>
     )
 }

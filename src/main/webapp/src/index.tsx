@@ -14,7 +14,6 @@ const GlobalStyles = createGlobalStyle`
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
       background-color: #f8f8f8;
-      overflow-y: hidden;
     }
     
     * {

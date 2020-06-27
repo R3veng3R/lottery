@@ -2,6 +2,7 @@ import React from "react";
 import {Ticket} from "../../types";
 import styled from "styled-components";
 import Moment from "react-moment";
+import {DEFAULT_PAGE_SIZE} from "../../constants/AppConstants";
 
 const TableContainer = styled.div`
     margin-top: 15px;
@@ -11,8 +12,6 @@ const TableContainer = styled.div`
     display: flex;
     flex-direction: column;
     width: 100%;
-    min-height: 100%;
-    max-width: 100%;
     color: rgba(0, 0, 0, 0.87);
     background-color: rgb(255, 255, 255);
 `;
@@ -70,38 +69,41 @@ const TableCol = styled.div`
     max-width: 100%;
     min-width: 100px;
     
-    &.id {
-      max-width: 5px;
+    &.number-column {
+      max-width: 4rem;
+      min-width: inherit;
+    }
+    
+    &.ticket-number-column {
+      min-width: 65%;
     }
 `;
 
 type TableProps = {
     data: Ticket[];
+    page: number;
 }
 
-export const Table: React.FC<TableProps> = ({data}) => {
+export const Table: React.FC<TableProps> = ({data, page}) => (
+    <TableContainer>
+        <TableHead>
+            <TableRow className="header-row">
+                <TableCol className="number-column">#</TableCol>
+                <TableCol className="ticket-number-column">Номера билета</TableCol>
+                <TableCol>Дата записи</TableCol>
+            </TableRow>
+        </TableHead>
 
-    return (
-        <TableContainer>
-            <TableHead>
-                <TableRow className="header-row">
-                    <TableCol className="id">#</TableCol>
-                    <TableCol>Номера билета</TableCol>
-                    <TableCol>Дата записи</TableCol>
-                </TableRow>
-            </TableHead>
-
-            <TableBody>
-                {
-                    data.map((ticket: Ticket, index: number) => (
-                        <TableRow key={index}>
-                            <TableCol className="id">{index + 1}.</TableCol>
-                            <TableCol dangerouslySetInnerHTML={{ __html: ticket.numbers}} />
-                            <TableCol> <Moment format={"DD/MM/YYYY HH:mm:ss"}>{ticket.created}</Moment></TableCol>
-                        </TableRow>
-                    ))
-                }
-            </TableBody>
-        </TableContainer>
-    )
-}
+        <TableBody>
+            {
+                data.map((ticket: Ticket, index: number) => (
+                    <TableRow key={index}>
+                        <TableCol className="number-column">{page * DEFAULT_PAGE_SIZE + (index + 1)}.</TableCol>
+                        <TableCol className="ticket-number-column" dangerouslySetInnerHTML={{__html: ticket.numbers}}/>
+                        <TableCol> <Moment format={"DD/MM/YYYY HH:mm:ss"}>{ticket.created}</Moment></TableCol>
+                    </TableRow>
+                ))
+            }
+        </TableBody>
+    </TableContainer>
+);
