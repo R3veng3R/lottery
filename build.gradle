@@ -1,5 +1,3 @@
-import java.text.SimpleDateFormat
-
 plugins {
 	id 'org.springframework.boot' version '2.3.1.RELEASE'
 	id 'io.spring.dependency-management' version '1.0.9.RELEASE'
@@ -51,8 +49,9 @@ task createVersion()  {
 		def cmd = "git rev-parse --short HEAD"
 		def proc = cmd.execute()
 		def version = proc.text.trim()
-		new File("src/main/resources/static", "version.json").text = "{\"version\": \"${  version }\"}"
+		new File("src/main/resources/static", "version.json").text = "{\"version\": \"1.0.${ version }\"}"
 	}
 }
 
-bootJar.finalizedBy(copyBatFile)
+copyWebApp.finalizedBy createVersion
+bootJar.finalizedBy copyBatFile

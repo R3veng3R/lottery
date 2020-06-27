@@ -49,10 +49,10 @@ export const HomePage: React.FC = () => {
             const searchArray = searchValue.split(" ");
 
             page.content.forEach(ticket => {
-                searchArray.forEach( string => {
+                searchArray.forEach(string => {
                     ticket.numbers = ticket.numbers.trim()
                         .split(' ').join('&nbsp;')
-                        .replace( new RegExp('(?!\/mark)' + string, 'g'), `<mark>${string}</mark>`);
+                        .replace(new RegExp('(?!\/mark)' + string, 'g'), `<mark>${string}</mark>`);
                 });
             });
 
@@ -60,6 +60,8 @@ export const HomePage: React.FC = () => {
             console.log("SearchResult", result);
         }
     }
+
+
 
     const addTicket = async () => {
         if (!numbers.length) return;
