@@ -9,7 +9,6 @@ export const BodyContainer = styled.section`
   position: relative;
   padding: 1rem;
   display: flex;
-  border: 1px solid red;
   flex-wrap: nowrap;
   justify-content: space-evenly;
   min-height: calc(100vh - 45px);

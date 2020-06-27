@@ -9,8 +9,8 @@ import {BodyContainer, Content, FlexWrapper, Input, Label} from "./styles/home-s
 import {FileUploader} from "../components/file-upload";
 import {Table} from "../components/table";
 import {Pagination} from "../components/pagination";
+import {DEFAULT_PAGE_SIZE} from "../constants/AppConstants";
 
-const DEFAULT_PAGE_SIZE = 20;
 const DEFAULT_TICKET_PAGE: TicketPage = {
     content: [], empty: true, totalElements: 0, totalPages: 0, number: 0
 }
@@ -133,7 +133,7 @@ export const HomePage: React.FC = () => {
                                 .then(() => setLoading(false));
                         }}
                                 page={ticketPage}/>
-                    <Table data={ticketPage.content}/>
+                    <Table data={ticketPage.content} page={ticketPage.number}/>
                 </Content>
 
                 <Content>
@@ -157,7 +157,7 @@ export const HomePage: React.FC = () => {
                                 .then(() => setLoading(false));
                         }}
                                 page={searchPage}/>
-                    <Table data={searchPage.content}/>
+                    <Table data={searchPage.content} page={searchPage.number}/>
 
                 </Content>
                 <Loader isHidden={!isLoading}/>
