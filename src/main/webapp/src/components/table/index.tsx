@@ -11,8 +11,6 @@ const TableContainer = styled.div`
     display: flex;
     flex-direction: column;
     width: 100%;
-    min-height: 100%;
-    max-width: 100%;
     color: rgba(0, 0, 0, 0.87);
     background-color: rgb(255, 255, 255);
 `;

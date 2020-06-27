@@ -5,27 +5,34 @@ export const FlexWrapper = styled.div`
   align-items: center;
 `;
 
-export const Content = styled.section`
+export const BodyContainer = styled.section`
   position: relative;
   padding: 1rem;
   display: flex;
-  align-items: center;
-  justify-content: space-around;
+  border: 1px solid red;
+  flex-wrap: nowrap;
+  justify-content: space-evenly;
+  min-height: calc(100vh - 45px);
   
   .margin-right-5 {
     margin-right: 5px;
   }
 `;
 
-export const Container = styled.div`
+export const Content = styled.div`
+  flex-grow: 1;
   padding: 1rem;
-  min-width: 48%;
-  min-height: 90vh;
   margin-bottom: 2.2rem;
   border: 1px solid rgba(206,206,206,0.35);
   border-radius: .5rem;
   box-shadow: 0 4px 25px 0 rgba(0,0,0,.1);
   background-color: #fff;
+  width: 48%;
+  
+    
+  &:first-child {
+     margin-right: 5px;
+  }
 `;
 
 export const Input = styled.input`
