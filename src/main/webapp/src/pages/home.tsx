@@ -10,6 +10,7 @@ import {FileUploader} from "../components/file-upload";
 import {Table} from "../components/table";
 import {Pagination} from "../components/pagination";
 import {DEFAULT_PAGE_SIZE} from "../constants/AppConstants";
+import {ExitScreen} from "../components/exit-screen";
 
 const DEFAULT_TICKET_PAGE: TicketPage = {
     content: [], empty: true, totalElements: 0, totalPages: 0, number: 0
@@ -23,6 +24,7 @@ export const HomePage: React.FC = () => {
     const [searchValue, setSearchValue] = useState<string>('');
 
     const [isLoading, setLoading] = useState<boolean>(false);
+    const [isAppClosed, setAppClosed] = useState<boolean>(false);
 
     useEffect(() => {
         setLoading(true);
@@ -60,8 +62,6 @@ export const HomePage: React.FC = () => {
             console.log("SearchResult", result);
         }
     }
-
-
 
     const addTicket = async () => {
         if (!numbers.length) return;
@@ -107,9 +107,13 @@ export const HomePage: React.FC = () => {
         setLoading(false);
     }
 
+    if (isAppClosed) {
+        return ( <ExitScreen /> );
+    }
+
     return (
         <>
-            <Header/>
+            <Header onAppShutdown = { () => setAppClosed(true) } />
 
             <BodyContainer>
                 <Content>
@@ -128,13 +132,12 @@ export const HomePage: React.FC = () => {
                         <FileUploader onChange={onFileChange}/>
                     </FlexWrapper>
 
-                    <Pagination onPageChange={
+                    <Pagination  page={ticketPage} onPageChange={
                         ({selected}) => {
                             setLoading(true);
                             getTicketPage(selected)
                                 .then(() => setLoading(false));
-                        }}
-                                page={ticketPage}/>
+                        }} />
                     <Table data={ticketPage.content} page={ticketPage.number}/>
                 </Content>
 
@@ -152,13 +155,12 @@ export const HomePage: React.FC = () => {
                         </Button>
                     </FlexWrapper>
 
-                    <Pagination onPageChange={
+                    <Pagination page={searchPage} onPageChange={
                         ({selected}) => {
                             setLoading(true);
                             getSearchPage(selected)
                                 .then(() => setLoading(false));
-                        }}
-                                page={searchPage}/>
+                        }}/>
                     <Table data={searchPage.content} page={searchPage.number}/>
 
                 </Content>

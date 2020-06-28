@@ -4,6 +4,8 @@ plugins {
 	id 'java'
 }
 
+def appMajorVersion = '1.0';
+
 group = 'ee.spinvest'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '11'
@@ -49,7 +51,7 @@ task createVersion()  {
 		def cmd = "git rev-parse --short HEAD"
 		def proc = cmd.execute()
 		def version = proc.text.trim()
-		new File("src/main/resources/static", "version.json").text = "{\"version\": \"1.0.${ version }\"}"
+		new File("src/main/resources/static", "version.json").text = "{\"version\": \"${appMajorVersion}.${ version }\"}"
 	}
 }
 

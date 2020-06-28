@@ -22,6 +22,11 @@ export const Column = styled.div`
     &.justify-flex-end {
       justify-content: flex-end;
     }
+    
+    &.disabled {
+      pointer-events: none;
+      opacity: 0.6;
+    }
 `
 
 export const StyledButton = styled.div`
@@ -42,7 +47,6 @@ export const StyledButton = styled.div`
      
     :hover {
         background-image: linear-gradient(30deg,#e42728,rgba(236,102,103,0.5));
-   
     }
 `;
 

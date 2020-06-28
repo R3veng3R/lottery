@@ -8,7 +8,7 @@ const GlobalStyles = createGlobalStyle`
     body {
       margin: 0;
       font-size: 1rem;
-      font-family: -apple-system, BlinkMacSystemFont, 'Roboto', 'Segoe UI', 'Roboto', 'Oxygen',
+      font-family: -apple-system, BlinkMacSystemFont, 'Roboto', 'Segoe UI', 'Oxygen',
         'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
         sans-serif;
       -webkit-font-smoothing: antialiased;
