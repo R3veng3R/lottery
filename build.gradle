@@ -41,11 +41,6 @@ task copyWebApp(type: Copy) {
 	into 'src/main/resources/static/.'
 }
 
-task copyBatFile(type: Copy) {
-	from './lottery.bat'
-	into './build/libs'
-}
-
 task createVersion()  {
 	doLast {
 		def cmd = "git rev-parse --short HEAD"
@@ -56,4 +51,3 @@ task createVersion()  {
 }
 
 copyWebApp.finalizedBy createVersion
-bootJar.finalizedBy copyBatFile

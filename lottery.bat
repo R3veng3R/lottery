@@ -1,1 +1,0 @@
-bundled_jre\bin\java.exe -jar lottery-0.0.1-SNAPSHOT.jar
