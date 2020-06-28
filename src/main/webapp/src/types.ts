@@ -11,3 +11,8 @@ export interface TicketPage {
     totalElements: number;
     number: number;
 }
+
+export enum InputEvent {
+    Search= "search",
+    Input = "input"
+}
