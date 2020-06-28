@@ -5,8 +5,14 @@ import {Button} from "../button";
 import {Column, Container, StyledButton, Version} from "./header-styles";
 import {MdDeleteForever} from "react-icons/md";
 import {ConfirmDeleteModal} from "../confirm-truncate-modal";
+import classNames from "classnames";
 
-export const Header: React.FC = () => {
+type HeaderProps = {
+    onAppShutdown?: () => void;
+    disabled?: boolean;
+}
+
+export const Header: React.FC<HeaderProps> = ({ onAppShutdown, disabled = false }) => {
     const [showTruncateModal, setShowTruncateModal] = useState<boolean>(false);
     const [appVersion, setAppVersion] = useState<string | null>(null);
 
@@ -20,10 +26,10 @@ export const Header: React.FC = () => {
     }, []);
 
     const shutDownApp = async () => {
-        const result = await Api.post("/api/shutdown");
+       const result = await Api.post("/api/shutdown");
 
-        if (result.status === 200) {
-            // TODO: redirect to bye;
+        if (result.status === 200 && onAppShutdown) {
+            onAppShutdown && onAppShutdown();
         }
     }
 
@@ -41,14 +47,14 @@ export const Header: React.FC = () => {
 
     return (
         <Container>
-            <Column>
+            <Column className={ classNames({ disabled: disabled }) }>
                 <Button className="danger"
                         onClick={ () => setShowTruncateModal(true) }>
                     <MdDeleteForever size={'1.3rem'}/>&nbsp;Отчистить базу
                 </Button>
             </Column>
 
-            <Column className="justify-flex-end">
+            <Column className={ classNames({ disabled: disabled, "justify-flex-end": true }) }>
                 <Version>{ 'App version: ' + appVersion }</Version>
                 <StyledButton onClick={ shutDownApp }> <RiShutDownLine size={'2rem'}/> </StyledButton>
             </Column>
