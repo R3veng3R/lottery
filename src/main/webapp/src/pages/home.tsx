@@ -4,7 +4,7 @@ import {Button} from "../components/button";
 import {GoPlus, GoSearch} from "react-icons/go";
 import Api from "../utils/Api";
 import {Loader} from "../components/loader";
-import {TicketPage} from "../types";
+import {InputEvent, TicketPage} from "../types";
 import {BodyContainer, Content, FlexWrapper, Input, Label} from "./styles/home-styles";
 import {FileUploader} from "../components/file-upload";
 import {Table} from "../components/table";
@@ -107,6 +107,18 @@ export const HomePage: React.FC = () => {
         setLoading(false);
     }
 
+    const onEnterKey = (event: React.KeyboardEvent, type: InputEvent) => {
+        if (event.key === 'Enter') {
+            switch (type) {
+                case InputEvent.Input:
+                    return addTicket();
+
+                case InputEvent.Search:
+                    return searchTicket();
+            }
+        }
+    }
+
     if (isAppClosed) {
         return ( <ExitScreen /> );
     }
@@ -122,6 +134,7 @@ export const HomePage: React.FC = () => {
                     <FlexWrapper>
                         <Input type="text" className="ticket-input margin-right-5"
                                value={numbers}
+                               onKeyUp={ (event: React.KeyboardEvent) => onEnterKey(event, InputEvent.Input) }
                                onChange={({target}) => setNumbers(target.value)}/>
 
                         <Button onClick={addTicket}>
@@ -147,6 +160,7 @@ export const HomePage: React.FC = () => {
                     <FlexWrapper>
                         <Input type="text" className="ticket-search margin-right-5"
                                value={searchValue}
+                               onKeyUp={ (event: React.KeyboardEvent) => onEnterKey(event, InputEvent.Search) }
                                onChange={({target}) => setSearchValue(target.value)}/>
 
                         <Button onClick={searchTicket}>
