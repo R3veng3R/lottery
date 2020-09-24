@@ -15,6 +15,8 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Ticket {
+    public static final String NUMBER_SEPARATOR = ",";
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;

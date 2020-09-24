@@ -2,6 +2,7 @@ package ee.spinvest.lottery.service;
 
 import ee.spinvest.lottery.model.Ticket;
 import ee.spinvest.lottery.repository.TicketRepository;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.*;
@@ -21,6 +22,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -49,6 +51,9 @@ public class TicketService {
             ticket.setCreated(new Date());
         }
 
+        final String normalizedNumbers = this.normalizeStringData(ticket.getNumbers());
+        ticket.setNumbers(normalizedNumbers);
+
         return ticketRepository.saveAndFlush(ticket);
     }
 
@@ -63,7 +68,7 @@ public class TicketService {
         log.info("Executing search query: " + searchQuery + " page: " + page + " size: " + size);
 
         final List<String> queryList =
-                Stream.of(searchQuery.split(" "))
+                Stream.of(searchQuery.split(Ticket.NUMBER_SEPARATOR))
                         .map(String::trim)
                         .collect(Collectors.toList());
 
@@ -73,7 +78,7 @@ public class TicketService {
 
         final List<Predicate> predicates = new ArrayList<>();
         queryList.forEach(keyword ->
-                predicates.add(cb.like(root.get("numbers"), "%" + keyword + "%"))
+                predicates.add(cb.like(root.get("numbers"), "% " + keyword + Ticket.NUMBER_SEPARATOR + "%"))
         );
 
         criteriaQuery
@@ -110,12 +115,16 @@ public class TicketService {
             try (Stream<String> stream = Files.lines(filePath)) {
 
                 stream.forEach(line -> {
-                    if (!ticketRepository.existsByNumbers(line)) {
-                        this.save(Ticket.builder()
-                                .numbers(line)
-                                .created(new Date())
-                                .build()
-                        );
+                    if (!line.trim().isBlank()) {
+                        final String testString = this.normalizeStringData(line);
+
+                        if (!ticketRepository.existsByNumbers(testString)) {
+                            this.save(Ticket.builder()
+                                    .numbers(testString)
+                                    .created(new Date())
+                                    .build()
+                            );
+                        }
                     }
                 });
 
@@ -146,5 +155,15 @@ public class TicketService {
                 .where(cb.or(predicates));
 
         return entityManager.createQuery(countQuery).getSingleResult();
+    }
+
+    private String normalizeStringData(String str) {
+        str = StringUtils.stripEnd(str.trim(), Ticket.NUMBER_SEPARATOR);
+
+        final String[] splitted = Arrays.stream(str.split(Ticket.NUMBER_SEPARATOR))
+                .map(String::trim)
+                .toArray(String[]::new);
+
+        return " " + String.join(Ticket.NUMBER_SEPARATOR + " ", splitted) + Ticket.NUMBER_SEPARATOR;
     }
 }

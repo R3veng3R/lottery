@@ -9,7 +9,7 @@ import {BodyContainer, Content, FlexWrapper, Input, Label} from "./styles/home-s
 import {FileUploader} from "../components/file-upload";
 import {Table} from "../components/table";
 import {Pagination} from "../components/pagination";
-import {DEFAULT_PAGE_SIZE} from "../constants/AppConstants";
+import {DEFAULT_PAGE_SIZE, NUMBER_SEPARATOR} from "../constants/AppConstants";
 import {ExitScreen} from "../components/exit-screen";
 
 const DEFAULT_TICKET_PAGE: TicketPage = {
@@ -44,17 +44,24 @@ export const HomePage: React.FC = () => {
         }
     }
 
+    // 3, 8, 26, 34, 40, 43, 3
     const getSearchPage = async (page: number) => {
         const result = await Api.get(`/api/ticket/search?query=${searchValue}&page=${page}&size=${DEFAULT_PAGE_SIZE}`);
         if (result.status === 200) {
             const page: TicketPage = result.data;
-            const searchArray = searchValue.split(" ");
+            const searchArray = searchValue.split(NUMBER_SEPARATOR);
 
             page.content.forEach(ticket => {
                 searchArray.forEach(string => {
-                    ticket.numbers = ticket.numbers.trim()
-                        .split(' ').join('&nbsp;')
-                        .replace(new RegExp('(?!\/mark)' + string, 'g'), `<mark>${string}</mark>`);
+                    string = string.trim();
+
+                    const test = ticket.numbers.trim()
+                        .split( " ");
+
+
+                    ticket.numbers = ticket.numbers
+                        .replace(new RegExp(`(?!\\/mark)(\\s|^)${string}${NUMBER_SEPARATOR}`, 'gm'), `&nbsp;<mark>${string.trim()}</mark>${NUMBER_SEPARATOR}`);
+
                 });
             });
 
